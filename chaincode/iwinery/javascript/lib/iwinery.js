@@ -20,9 +20,9 @@ class IWinery extends Contract {
                 move: 'Fermentacao',
                 temperature: '30',
                 humidity: '80',
-                container: "Barril de Aço",
+                container: "Barril de Aco",
                 responsible: "Antonio Costa",
-                addedElements: "[{name: 'Açúcar', quantity: '200'}"
+                addedElements: "[{name: 'Acucar', quantity: '200'}"
             },
             {
                 id: "Cz2xVQVJjIvXctwlDhgY",
@@ -32,10 +32,9 @@ class IWinery extends Contract {
                 temperature: '30',
                 humidity: '80',
                 container: "Barril de Aço",
-                responsible: "José das Alfaces",
+                responsible: "Jose das Alfaces",
                 addedElements: ""
-            }
-
+            },
         ];
 
         for (let i = 0; i < wines.length; i++) {
@@ -68,7 +67,7 @@ class IWinery extends Contract {
             humidity,
             container,
             responsible,
-            addedElements
+            addedElements,
         };
 
         await ctx.stub.putState(wineNumber, Buffer.from(JSON.stringify(wine)));

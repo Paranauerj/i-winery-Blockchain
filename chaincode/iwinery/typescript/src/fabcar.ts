@@ -1,43 +1,15 @@
 /*
- * Copyright IBM Corp. All Rights Reserved.
- *
  * SPDX-License-Identifier: Apache-2.0
  */
 
-'use strict';
+import { Context, Contract } from 'fabric-contract-api';
+import { Car } from './car';
 
-const { Contract } = require('fabric-contract-api');
+export class FabCar extends Contract {
 
-class FabCar extends Contract {
-
-    async initLedger(ctx) {
+    public async initLedger(ctx: Context) {
         console.info('============= START : Initialize Ledger ===========');
-        const cars = [
-            {
-                id: "Cz2xVQVJjIvXctwlDhgY",
-                date: '2022-05-18',
-                location: 'Vila Real',
-                move: 'Fermentacao',
-                temperature: '30',
-                humidity: '80',
-                container: "Barril de Aco",
-                responsible: "Antonio Costa",
-                addedElements: "[{name: 'Acucar', quantity: '200'}"
-            },
-            {
-                id: "Cz2xVQVJjIvXctwlDhgY",
-                date: '2022-07-18',
-                location: 'Peso da Regua',
-                move: 'Movimentacao de Barril',
-                temperature: '30',
-                humidity: '80',
-                container: "Barril de Aço",
-                responsible: "Jose das Alfaces",
-                addedElements: ""
-            },
-        ];
-        
-        /*const cars = [
+        const cars: Car[] = [
             {
                 color: 'blue',
                 make: 'Toyota',
@@ -98,7 +70,7 @@ class FabCar extends Contract {
                 model: 'Barina',
                 owner: 'Shotaro',
             },
-        ];*/
+        ];
 
         for (let i = 0; i < cars.length; i++) {
             cars[i].docType = 'car';
@@ -108,7 +80,7 @@ class FabCar extends Contract {
         console.info('============= END : Initialize Ledger ===========');
     }
 
-    async queryCar(ctx, carNumber) {
+    public async queryCar(ctx: Context, carNumber: string): Promise<string> {
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
         if (!carAsBytes || carAsBytes.length === 0) {
             throw new Error(`${carNumber} does not exist`);
@@ -117,10 +89,10 @@ class FabCar extends Contract {
         return carAsBytes.toString();
     }
 
-    async createCar(ctx, carNumber, make, model, color, owner) {
+    public async createCar(ctx: Context, carNumber: string, make: string, model: string, color: string, owner: string) {
         console.info('============= START : Create Car ===========');
 
-        const car = {
+        const car: Car = {
             color,
             docType: 'car',
             make,
@@ -132,7 +104,7 @@ class FabCar extends Contract {
         console.info('============= END : Create Car ===========');
     }
 
-    async queryAllCars(ctx) {
+    public async queryAllCars(ctx: Context): Promise<string> {
         const startKey = '';
         const endKey = '';
         const allResults = [];
@@ -151,14 +123,14 @@ class FabCar extends Contract {
         return JSON.stringify(allResults);
     }
 
-    async changeCarOwner(ctx, carNumber, newOwner) {
+    public async changeCarOwner(ctx: Context, carNumber: string, newOwner: string) {
         console.info('============= START : changeCarOwner ===========');
 
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
         if (!carAsBytes || carAsBytes.length === 0) {
             throw new Error(`${carNumber} does not exist`);
         }
-        const car = JSON.parse(carAsBytes.toString());
+        const car: Car = JSON.parse(carAsBytes.toString());
         car.owner = newOwner;
 
         await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
@@ -166,5 +138,3 @@ class FabCar extends Contract {
     }
 
 }
-
-module.exports = FabCar;
