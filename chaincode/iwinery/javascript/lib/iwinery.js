@@ -22,12 +22,7 @@ class IWinery extends Contract {
                 humidity: '80',
                 container: "Barril de Aço",
                 responsible: "Antonio Costa",
-                addedElements: [
-                    {
-                        name: "Açúcar",
-                        quantity: "200"
-                    }
-                ]
+                addedElements: "[{name: 'Açúcar', quantity: '200'}"
             },
             {
                 id: "Cz2xVQVJjIvXctwlDhgY",
@@ -38,7 +33,7 @@ class IWinery extends Contract {
                 humidity: '80',
                 container: "Barril de Aço",
                 responsible: "José das Alfaces",
-                addedElements: []
+                addedElements: ""
             }
 
         ];
@@ -60,20 +55,25 @@ class IWinery extends Contract {
         return wineAsBytes.toString();
     }
 
-    /*async createCar(ctx, carNumber, make, model, color, owner) {
-        console.info('============= START : Create Car ===========');
+    async createWine(ctx, wineNumber, id, date, location, move, temperature, humidity, container, responsible, addedElements) {
+        console.info('============= START : Create Wine ===========');
 
-        const car = {
-            color,
-            docType: 'car',
-            make,
-            model,
-            owner,
+        const wine = {
+            id,
+            docType: 'wine',
+            date,
+            location,
+            move,
+            temperature,
+            humidity,
+            container,
+            responsible,
+            addedElements
         };
 
-        await ctx.stub.putState(carNumber, Buffer.from(JSON.stringify(car)));
-        console.info('============= END : Create Car ===========');
-    }*/
+        await ctx.stub.putState(wineNumber, Buffer.from(JSON.stringify(wine)));
+        console.info('============= END : Create Wine ===========');
+    }
 
     async queryAllWines(ctx) {
         const startKey = '';
@@ -94,8 +94,8 @@ class IWinery extends Contract {
         return JSON.stringify(allResults);
     }
 
-    /*
-    async changeCarOwner(ctx, carNumber, newOwner) {
+    
+    /*async changeCarOwner(ctx, carNumber, newOwner) {
         console.info('============= START : changeCarOwner ===========');
 
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
