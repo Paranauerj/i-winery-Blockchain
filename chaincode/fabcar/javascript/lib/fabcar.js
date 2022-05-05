@@ -12,7 +12,7 @@ class FabCar extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
-        const cars = [
+        /*const wines = [
             {
                 id: "Cz2xVQVJjIvXctwlDhgY",
                 date: '2022-05-18',
@@ -35,9 +35,9 @@ class FabCar extends Contract {
                 responsible: "Jose das Alfaces",
                 addedElements: ""
             },
-        ];
+        ];*/
         
-        /*const cars = [
+        const cars = [
             {
                 color: 'blue',
                 make: 'Toyota',
@@ -98,7 +98,7 @@ class FabCar extends Contract {
                 model: 'Barina',
                 owner: 'Shotaro',
             },
-        ];*/
+        ];
 
         for (let i = 0; i < cars.length; i++) {
             cars[i].docType = 'car';

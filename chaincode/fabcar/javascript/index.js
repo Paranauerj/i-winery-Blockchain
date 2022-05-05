@@ -6,7 +6,8 @@
 
 'use strict';
 
-const FabCar = require('./lib/fabcar');
+const IWinery = require('./lib/iwinery');
 
-module.exports.FabCar = FabCar;
-module.exports.contracts = [ FabCar ];
+module.exports.FabCar = IWinery;
+
+module.exports.contracts = [ IWinery ];
