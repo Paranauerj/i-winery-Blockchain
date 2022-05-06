@@ -11,11 +11,12 @@ const path = require('path');
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const API_KEY = "507e1a93c3cb189293914bf4e06e1d94";
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json(), cors());
 
 app.get("/wines/interactions", async function(req, res, next){
     EvaluateTransaction(res, "queryAllWines");
