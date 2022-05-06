@@ -93,6 +93,29 @@ class IWinery extends Contract {
         return JSON.stringify(allResults);
     }
 
+    async queryWineByWineId(ctx, wineId) {
+        const startKey = '';
+        const endKey = '';
+        const filteredResults = [];
+        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            const strValue = Buffer.from(value).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            
+            if(record.id == wineId){
+                filteredResults.push({ Key: key, Record: record });
+            }
+            
+        }
+        console.info(filteredResults);
+        return JSON.stringify(filteredResults);
+    }
+
     
     /*async changeCarOwner(ctx, carNumber, newOwner) {
         console.info('============= START : changeCarOwner ===========');

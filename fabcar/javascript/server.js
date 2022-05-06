@@ -12,24 +12,34 @@ const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 
+const API_KEY = "507e1a93c3cb189293914bf4e06e1d94";
+
 const app = express();
 app.use(bodyParser.json());
 
-app.get("/wines", async function(req, res, next){
+app.get("/wines/interactions", async function(req, res, next){
     EvaluateTransaction(res, "queryAllWines");
 });
 
-app.get("/wines/:id_wine", async function(req, res, next){
-    EvaluateTransaction(res, "queryWine", req.params.id_wine);
+app.get("/wines/interactions/:id_interaction_wine", async function(req, res, next){
+    EvaluateTransaction(res, "queryWine", req.params.id_interaction_wine);
 });
 
-app.post("/wines", async function(req, res){
+app.get("/wines/:id_wine", async function(req, res, next){
+    EvaluateTransaction(res, "queryWineByWineId", req.params.id_wine);
+});
+
+app.post("/wines/interactions", async function(req, res){
+    if(req.headers["x-api-key"] !== API_KEY){
+        res.status(403).json({message: "Forbidden - Invalid API Key", code: "403"});
+        return;
+    }
+
     var elements = req.body.addedElements;
     var aux = [];
     for(var i = 0; i < elements.length; i++){
         aux.push(JSON.stringify(elements[i]))
     }
-
     var addedElements = "[" + aux.join(',') + "]";
 
     SubmitTransaction(res, "createWine", "WINE" + String(Math.floor(Math.random() * 10000000)), req.body.id, req.body.date, req.body.location, req.body.move, req.body.temperature, req.body.humidity, req.body.container, req.body.responsible, addedElements)
@@ -59,7 +69,7 @@ async function EvaluateTransaction(res, name, ...args){
         const result = await contract.evaluateTransaction(name, ...args);
         var response;
 
-        if(args.length == 0){
+        if(name == "queryAllWines" || name == "queryWineByWineId"){
             response = eval(result.toString());
             for(var i = 0; i < response.length; i++){
                 response[i].Record.addedElements = eval(response[i].Record.addedElements);
