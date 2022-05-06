@@ -22,7 +22,7 @@ class IWinery extends Contract {
                 humidity: '80',
                 container: "Barril de Aco",
                 responsible: "Antonio Costa",
-                addedElements: "[{name: 'Acucar', quantity: '200'}"
+                addedElements: "[{name: 'Acucar', quantity: '200'}]"
             },
             {
                 id: "Cz2xVQVJjIvXctwlDhgY",

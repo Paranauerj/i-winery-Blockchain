@@ -46,6 +46,9 @@ async function main() {
         const result = await contract.evaluateTransaction('queryAllWines');
         console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
 
+        // await contract.submitTransaction('createWine', "WINE" + String(Math.floor(Math.random() * 10000000)), "Cz2xVQVJjIvXctwlDhgY", "2021-01-01", "Miranda", "Movimentacao de Barril", "20", "5", "Barril de aco", "Joao teste 2", "[]");
+        // console.log("foi!")
+
         // Disconnect from the gateway.
         await gateway.disconnect();
         

@@ -10,11 +10,13 @@ const { Gateway, Wallets } = require('fabric-network');
 const path = require('path');
 const express = require('express');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const app = express();
+app.use(bodyParser.json());
 
 app.get("/wines", async function(req, res, next){
-    EvaluateTransaction(res, req, "queryAllWines");
+    EvaluateTransaction(res, "queryAllWines");
 });
 
 app.get("/wines/:id_wine", async function(req, res, next){
@@ -28,9 +30,9 @@ app.post("/wines", async function(req, res){
         aux.push(JSON.stringify(elements[i]))
     }
 
-    var addedElements = aux.join(',');
+    var addedElements = "[" + aux.join(',') + "]";
 
-    SubmitTransaction(res, createWine, String(Math.floor(Math.random() * 10000000)), req.body.id, req.body.date, req.body.location, req.body.move, req.body.temperature, req.body.humidity, req.body.container, req.body.responsible, addedElements)
+    SubmitTransaction(res, "createWine", "WINE" + String(Math.floor(Math.random() * 10000000)), req.body.id, req.body.date, req.body.location, req.body.move, req.body.temperature, req.body.humidity, req.body.container, req.body.responsible, addedElements)
 });
 
 app.listen("8001");
@@ -54,8 +56,21 @@ async function EvaluateTransaction(res, name, ...args){
         const network = await gateway.getNetwork('mychannel');
         const contract = network.getContract('fabcar');
 
-        const result = await contract.evaluateTransaction(name, args);
-        var response = args.length == 0 ? eval(result.toString()) : JSON.parse(result.toString());
+        const result = await contract.evaluateTransaction(name, ...args);
+        var response;
+
+        if(args.length == 0){
+            response = eval(result.toString());
+            for(var i = 0; i < response.length; i++){
+                response[i].Record.addedElements = eval(response[i].Record.addedElements);
+            }
+        }
+
+        else{
+            response = JSON.parse(result.toString());
+            response.addedElements = eval(response.addedElements);
+        } 
+
         res.status(200).json(response);
 
         await gateway.disconnect();
@@ -86,8 +101,8 @@ async function SubmitTransaction(res, name, ...args){
         const network = await gateway.getNetwork('mychannel');
         const contract = network.getContract('fabcar');
 
-        await contract.submitTransaction(name, args);
-        res.status(200).json({message: "Transaction Submmited!"});
+        await contract.submitTransaction(name, ...args);
+        res.status(200).json({message: "Transaction Submmited!", id: args[0]});
 
         await gateway.disconnect();
         
