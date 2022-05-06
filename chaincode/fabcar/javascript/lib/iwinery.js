@@ -14,7 +14,7 @@ class IWinery extends Contract {
         console.info('============= START : Initialize Ledger ===========');
         const wines = [
             {
-                id: "Cz2xVQVJjIvXctwlDhgY",
+                id: "Cz2xVQJVjIvXctwlDhgY",
                 date: '2022-05-18',
                 location: 'Vila Real',
                 move: 'Fermentacao',
@@ -25,7 +25,7 @@ class IWinery extends Contract {
                 addedElements: '[{name: "Acucar", quantity: "200"}]',
             },
             {
-                id: "Cz2xVQVJjIvXctwlDhgY",
+                id: "Cz2xVQJVjIvXctwlDhgY",
                 date: '2022-07-18',
                 location: 'Peso da Regua',
                 move: 'Movimentacao de Barril',
