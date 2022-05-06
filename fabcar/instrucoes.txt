@@ -1,0 +1,11 @@
+Para rodar a rede como nova:
+sudo ./startFabric.sh javascript
+cd javascript
+node enrollAdmin.js
+node registerUser.js
+node server.js
+
+Para rodar rede existente:
+sudo chmod 666 /var/run/docker.sock // para dar autorização ao docker
+docker kill $(docker ps -a -q) // OPCIONAL - para parar os containers
+docker restart $(docker ps -a -q) // para reiniciar os containers
