@@ -10,9 +10,10 @@ function pull_docker_images() {
 
   docker pull ${FABRIC_CONTAINER_REGISTRY}/fabric-ca:$FABRIC_CA_VERSION
   docker pull ${FABRIC_CONTAINER_REGISTRY}/fabric-orderer:$FABRIC_VERSION
-  docker pull ${FABRIC_CONTAINER_REGISTRY}/fabric-peer:$FABRIC_VERSION
+  docker pull ${FABRIC_PEER_IMAGE}
   docker pull ${FABRIC_CONTAINER_REGISTRY}/fabric-tools:$FABRIC_VERSION
   docker pull ghcr.io/hyperledgendary/fabric-ccaas-asset-transfer-basic:latest
+  docker pull couchdb:3.2.1
 
   pop_fn
 }
@@ -22,16 +23,35 @@ function load_docker_images() {
 
   kind load docker-image ${FABRIC_CONTAINER_REGISTRY}/fabric-ca:$FABRIC_CA_VERSION
   kind load docker-image ${FABRIC_CONTAINER_REGISTRY}/fabric-orderer:$FABRIC_VERSION
-  kind load docker-image ${FABRIC_CONTAINER_REGISTRY}/fabric-peer:$FABRIC_VERSION
+  kind load docker-image ${FABRIC_PEER_IMAGE}
   kind load docker-image ${FABRIC_CONTAINER_REGISTRY}/fabric-tools:$FABRIC_VERSION
   kind load docker-image ghcr.io/hyperledgendary/fabric-ccaas-asset-transfer-basic:latest
   kind load docker-image couchdb:3.2.1
-  
-  pop_fn 
+
+  pop_fn
 }
 
+function pull_docker_images_for_rest_sample() {
+  push_fn "Pulling docker images for fabric-rest-sample"
+
+  docker pull ghcr.io/hyperledger/fabric-rest-sample:latest
+  docker pull redis:6.2.5
+
+  pop_fn
+}
+
+function load_docker_images_for_rest_sample() {
+  push_fn "Loading docker images for fabric-rest-sample to KIND control plane"
+
+  kind load docker-image ghcr.io/hyperledgendary/fabric-ccaas-asset-transfer-basic:latest
+  kind load docker-image redis:6.2.5
+
+  pop_fn
+}
+
+
 function apply_nginx_ingress() {
-  push_fn "Launching Nginx ingress controller"
+  push_fn "Launching ingress controller"
 
   # This ingress-nginx.yaml was generated 9/24 from https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
   # with modifications for ssl-passthrough required to launch IBP-support with the nginx ingress.
@@ -42,11 +62,28 @@ function apply_nginx_ingress() {
   pop_fn
 }
 
-function install_cert_manager() {
-  push_fn "Installing cert-manager"
+function wait_for_nginx_ingress() {
+  push_fn "Waiting for ingress controller"
 
-    # Install cert-manager to manage TLS certificates
+  kubectl wait --namespace ingress-nginx \
+    --for=condition=ready pod \
+    --selector=app.kubernetes.io/component=controller \
+    --timeout=90s
+
+  pop_fn
+}
+
+function apply_cert_manager() {
+  push_fn "Launching cert-manager"
+
+  # Install cert-manager to manage TLS certificates
   kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
+
+  pop_fn
+}
+
+function wait_for_cert_manager() {
+  push_fn "Waiting for cert-manager"
 
   kubectl -n cert-manager rollout status deploy/cert-manager
   kubectl -n cert-manager rollout status deploy/cert-manager-cainjector
@@ -57,6 +94,9 @@ function install_cert_manager() {
 
 function kind_create() {
   push_fn  "Creating cluster \"${CLUSTER_NAME}\""
+
+  # prevent the next kind cluster from using the previous Fabric network's enrollments.
+  rm -rf $PWD/build
 
   # todo: always delete?  Maybe return no-op if the cluster already exists?
   kind delete cluster --name $CLUSTER_NAME
@@ -87,8 +127,8 @@ nodes:
       - containerPort: 443
         hostPort: ${ingress_https_port}
         protocol: TCP
-networking:
-  kubeProxyMode: "ipvs"
+#networking:
+#  kubeProxyMode: "ipvs"
 
 # create a cluster with the local registry enabled in containerd
 containerdConfigPatches:
@@ -97,6 +137,12 @@ containerdConfigPatches:
     endpoint = ["http://${reg_name}:${reg_port}"]
 
 EOF
+
+  # workaround for https://github.com/hyperledger/fabric-samples/issues/550 - pods can not resolve external DNS
+  for node in $(kind get nodes);
+  do
+    docker exec "$node" sysctl net.ipv4.conf.all.route_localnet=1;
+  done
 
   pop_fn
 }
@@ -151,13 +197,18 @@ function kind_init() {
 
   kind_create
   apply_nginx_ingress
-  install_cert_manager
+  apply_cert_manager
   launch_docker_registry
 
   if [ "${STAGE_DOCKER_IMAGES}" == true ]; then
-    pull_docker_images 
-    load_docker_images 
-  fi 
+    pull_docker_images
+    load_docker_images
+    pull_docker_images_for_rest_sample
+    load_docker_images_for_rest_sample
+  fi
+
+  wait_for_cert_manager
+  wait_for_nginx_ingress
 }
 
 function kind_unkind() {
