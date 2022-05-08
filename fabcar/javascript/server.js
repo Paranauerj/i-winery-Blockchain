@@ -46,6 +46,15 @@ app.post("/wines/interactions", async function(req, res){
     SubmitTransaction(res, "createWine", "WINE" + String(Math.floor(Math.random() * 10000000)), req.body.id, req.body.date, req.body.location, req.body.move, req.body.temperature, req.body.humidity, req.body.container, req.body.responsible, addedElements)
 });
 
+app.delete("/wines/interactions/:id_interaction_wine", async function(req, res){
+    if(req.headers["x-api-key"] !== API_KEY){
+        res.status(403).json({message: "Forbidden - Invalid API Key", code: "403"});
+        return;
+    }
+
+    SubmitTransaction(res, "removeWine", req.params.id_interaction_wine);
+});
+
 app.listen("8001");
 
 async function EvaluateTransaction(res, name, ...args){
@@ -89,7 +98,7 @@ async function EvaluateTransaction(res, name, ...args){
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
         res.status(500).json({error: error});
-        process.exit(1);
+        // process.exit(1);
     }
 }
 
@@ -120,6 +129,6 @@ async function SubmitTransaction(res, name, ...args){
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
         res.status(500).json({error: error});
-        process.exit(1);
+        // process.exit(1);
     }
 }

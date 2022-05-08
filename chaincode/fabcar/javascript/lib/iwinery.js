@@ -116,7 +116,19 @@ class IWinery extends Contract {
         return JSON.stringify(filteredResults);
     }
 
-    
+    async removeWine(ctx, wineNumber) {
+        console.info('============= START : removeWine ===========');
+
+        const wineAsBytes = await ctx.stub.getState(wineNumber); // get the car from chaincode state
+        if (!wineAsBytes || wineAsBytes.length === 0) {
+            throw new Error(`${wineNumber} does not exist`);
+        }
+        
+
+        await ctx.stub.deleteState(wineNumber);
+        console.info('============= END : removeWine ===========');
+    }
+
     /*async changeCarOwner(ctx, carNumber, newOwner) {
         console.info('============= START : changeCarOwner ===========');
 
