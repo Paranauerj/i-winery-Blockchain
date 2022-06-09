@@ -1,6 +1,7 @@
 const { SubmitTransaction, EvaluateTransaction } = require("./smartContractHandler");
 require('dotenv').config();
 
+// Pega a API_KEY do .env
 const API_KEY = process.env.API_KEY_IWINERY;
 
 module.exports.listInteractions = async function(req, res, next){
